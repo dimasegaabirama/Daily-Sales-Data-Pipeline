@@ -113,9 +113,9 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 ---
 
 ## 📊 Pipeline & Database Schema
-# Pipeline Flow:
+### Pipeline Flow:
 
-# Database Schema (Dimension & Fact Tables):
+### Database Schema (Dimension & Fact Tables):
 
 ---
 ## 🔑 Portfolio Highlights
