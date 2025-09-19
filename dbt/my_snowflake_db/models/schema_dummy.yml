@@ -1,0 +1,343 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: LANDING
+    # freshness:
+    #   warn_after: {count: 1, period: day}
+    #   error_after: {count: 3, period: day}
+    # loaded_at_file:
+    tables:
+      - name: products
+        description: "Table berisi data products"
+        columns:
+          - name: ProductID
+            tests: 
+              - unique
+              - not_null
+          - name: Price
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+
+      - name: warehouses
+        description: "Table berisi data warehouse"
+        columns:
+          - name: WarehouseID
+            tests:
+              - unique
+              - not_null
+          - name: Capacity
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+
+      - name: suppliers
+        description: "Table berisi data suppliers"
+        columns:
+          - name: SupplierID
+            tests:
+              - unique
+              - not_null
+          - name: ContactEmail
+            tests:
+              - dbt_expectations.expect_column_values_to_match_regex:
+                  regex: '^.+@.+\..+$'
+
+      - name: shipments
+        description: "Table berisi data shipments"
+        columns:
+          - name: ShipmentID
+            tests:
+              - unique
+              - not_null
+          - name: SupplierID
+            tests:
+              - not_null
+          - name: WarehouseID
+            tests:
+              - not_null
+          - name: shipmentDate
+            tests:
+              - not_null
+
+      - name: shipmentitems
+        description: "Table berisi data shipmentitems"
+        columns:
+          - name: ShipmentItemID
+            tests:
+              - unique
+              - not_null
+          - name: ShipmentID
+            tests:
+              - not_null
+          - name: ProductID
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 1
+              - not_null
+
+      - name: stock
+        description: "Table berisi data stock"
+        columns:
+          - name: WarehouseID
+            tests:
+              - not_null
+          - name: ProductID
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+              - not_null
+
+      - name: sales
+        description: "Table berisi data sales"
+        columns:
+          - name: SaleID
+            tests:
+              - unique
+              - not_null
+          - name: SaleDate
+            tests:
+              - not_null
+          - name: ProductID
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 1
+              - not_null
+          - name: TotalAmount
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+              - not_null
+
+      - name: orders
+        description: "Table berisi data orders"
+        columns:
+          - name: OrderID
+            tests:
+              - unique
+              - not_null
+          - name: OrderDate
+            tests:
+              - not_null
+
+      - name: orderitems
+        description: "Table berisi data orderitems"
+        columns:
+          - name: OrderItemID
+            tests:
+              - unique
+              - not_null
+          - name: OrderID
+            tests:
+              - not_null
+          - name: ProductID
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 1
+              - not_null
+          - name: Price
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+              - not_null
+
+models:
+  - name: dim_date
+    description: "Table berisi data dimensi tanggal"
+    columns:
+      - name: id
+        tests:
+          - validate_id_date:
+              column_date_target: dt
+          - unique
+          - not_null
+      - name: year
+        tests:
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              value: 4
+      - name: month
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 12
+      - name: day
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 31
+      - name: quarter
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 4
+      - name: month_name
+        description: "Nama bulan"
+        tests:
+          - validate_in_set:
+              value: "('january','february','march','april','may','june','july','august','september','october','november','december')"
+      - name: weekday_name
+        description: "Nama hari"
+        tests:
+          - validate_in_set:
+              value: "('sun','mon','tue','wed','thu','fri','sat')"
+      - name: day_type
+        description: "Tipe hari"
+        tests:
+          - validate_in_set:
+              value: "('weekday','weekend')"
+      - name: days_in_month
+        description: "Jumlah hari dalam bulan"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 28
+              max_value: 31
+
+  - name: dim_products
+    description: "Table berisi data produk"
+    columns:
+      - name: product_name
+        tests:
+          - check_trim_lower
+      - name: category
+        tests:
+          - validate_in_set:
+              value: "('home','clothing')"
+
+  - name: dim_suppliers
+    description: "Table berisi data supplier"
+    columns:
+      - name: supplier_id
+        tests:
+          - unique
+          - not_null
+      - name: supplier_name
+        tests:
+          - check_trim_lower
+      - name: contact_name
+        tests:
+          - check_trim_lower
+      - name: contact_email
+        tests:
+          - check_trim_lower
+
+  - name: dim_warehouses
+    description: "Table berisi data gudang"
+    columns:
+      - name: warehouse_id
+        tests:
+          - unique
+          - not_null
+      - name: location
+        tests:
+          - check_trim_lower
+          - validate_in_set:
+              value: "('london','manchester','birmingham','glasgow','liverpool','leeds')"
+
+  - name: fact_inventory
+    description: "Table berisi data inventory harian"
+    tests:
+      - validate_fact_inventory_arrays
+    columns:
+      - name: warehouse_id
+        tests:
+          - relationships:
+              to: ref('dim_warehouses')
+              field: warehouse_id
+      - name: product_id_array
+        tests:
+          - validate_arrays_ref_other_table:
+              ref_table: ref('dim_products')
+              ref_column: product_id
+      - name: stock_array
+        tests:
+          - validate_arrays_negative
+      - name: snapshotdate_id
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: id
+          - dim_date_max_current_date
+
+  - name: fact_orders
+    description: "Table berisi data pesanan"
+    columns:
+      - name: orderitem_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        tests:
+          - check_trim_lower
+      - name: customer_address
+        tests:
+          - check_trim_lower
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: orderdate_id
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: id
+          - dim_date_max_current_date
+
+  - name: fact_sales
+    description: "Table berisi data penjualan"
+    columns:
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: saledate_id
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: id
+          - dim_date_max_current_date
+
+  - name: fact_shipments
+    description: "Table berisi data pengiriman"
+    columns:
+      - name: shipmentitem_id
+        tests:
+          - unique
+          - not_null
+      - name: supplier_id
+        tests:
+          - relationships:
+              to: ref('dim_suppliers')
+              field: supplier_id
+      - name: warehouse_id
+        tests:
+          - relationships:
+              to: ref('dim_warehouses')
+              field: warehouse_id
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: quantity
+      - name: shipmentdate_id
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: id
+          - dim_date_max_current_date
+        
