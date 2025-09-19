@@ -112,4 +112,18 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 
 ---
 
+## 📊 Pipeline & Database Schema
+# Pipeline Flow:
+
+# Database Schema (Dimension & Fact Tables):
+
+---
+## 🔑 Portfolio Highlights
+
+- Demonstrates end-to-end retail data pipeline
+- Shows integration of Airflow, Snowflake, dbt, and Python ETL scripts
+- Includes modular ETL, snapshotting, and automated data quality testing
+- Fully documented and ready to showcase on GitHub
+
+---
 
