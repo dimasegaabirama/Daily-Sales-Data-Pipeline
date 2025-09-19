@@ -112,10 +112,20 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 
 ---
 
-## 📊 Pipeline & Database Schema
-### Pipeline Flow:
+## 📊 Pipeline, Database & BI Overview
 
-### Database Schema (Dimension & Fact Tables):
+**Pipeline Flow:**  
+![Pipeline Diagram](docs/pipeline.png)
+
+**Source Schema (MySQL)**
+![Source Schema](docs/schema_source.png)
+
+**Warehouse Schema (Snowflake)**
+![Warehouse Schema](docs/schema_warehouse.png)
+
+**Dashboard:**  
+This shows sample visualizations based on the data loaded into Snowflake and transformed via dbt.  
+![Power BI Dashboard](docs/powerbi_dashboard.png)
 
 ---
 ## 🔑 Portfolio Highlights
