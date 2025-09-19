@@ -24,32 +24,65 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 ---
 
 ## 📂 Struktur Proyek
-
 .
-├── dags/
-│ └── daily_sales.py 
-├── include/
-│ ├── config/
-│ │ ├── .secrets.toml 
-│ │ └── airflow_settings.yaml
-│ ├── etl/
-│ │ ├── connection.py 
-│ │ ├── extract.py 
-│ │ ├── load.py 
-│ │ ├── transform.py
-│ │ └── utils.py 
-│ └── sql/
-│   └── create_table.sql
-├── tests/
-│ └── dags/
-│   └── test_dag_example.py
-│
-├── .dockerignore
+├── airflow/
+│   ├── dags/
+│   │   └── daily_sales.py 
+│   ├── include/
+│   │   ├── config/
+│   │   │   ├── .secrets.toml 
+│   │   │   └── airflow_settings.yaml
+│   │   ├── etl/
+│   │   │   ├── connection.py 
+│   │   │   ├── extract.py 
+│   │   │   ├── load.py 
+│   │   │   ├── transform.py
+│   │   │   └── utils.py 
+│   │   └── sql/
+│   │       └── create_table.sql
+│   ├── tests/
+│   │   └── dags/
+│   │       └── test_dag_example.py
+│   ├── .dockerignore
+│   ├── docker-compose.override.yml
+│   ├── Dockerfile
+│   ├── packages.txt
+│   └── requirements.txt
+│  
+├── dbt/
+│   └── my_snowflake_db/
+│       ├── analyses/ 
+│       ├── macros/
+│       │   └── generate_schema_name.sql  
+│       ├── models/
+│       │   ├── dimension/
+│       │   │   ├── dim_date.sql
+│       │   │   ├── dim_products.sql
+│       │   │   ├── dim_suppliers.sql
+│       │   │   └── dim_warehouse.sql
+│       │   ├── fact/
+│       │   │   ├── fact_inventory.sql
+│       │   │   ├── fact_orders.sql
+│       │   │   ├── fact_sales.sql
+│       │   │   └── fact_shipments.sql
+│       │   └── schema_warehouse.yml
+│       ├── seeds/
+│       ├── snapshots/
+│       │   ├── dim_product_snapshot.sql
+│       │   ├── dim_supplier_snapshot.sql
+│       │   └── dim_warehouse_snapshot.sql
+│       ├── tests/
+│       │   ├── generic/
+│       │   │   ├── test_string_and_set.sql
+│       │   │   ├── test_validate_fact_inventory_arrays.sql
+│       │   │   └── test_validate_id_date.sql
+│       │   └── singular/
+│       ├── .gitignore
+│       ├── dbt_project.yml
+│       ├── package-lock.yml
+│       ├── packages.yml
+│       └── profiles.yml
 ├── .gitignore
-├── docker-compose.override.yml
-├── dockerfile
-├── packages.txt
-├── requirements.txt
 └── README.md
 
 ---
