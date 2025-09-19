@@ -24,7 +24,7 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 ---
 
 ## 📂 Struktur Proyek
-```bash #
+```bash
 .
 ├── airflow/
 │   ├── dags/
@@ -85,7 +85,7 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │       └── profiles.yml
 ├── .gitignore
 └── README.md
-#
+```
 ---
 
 ## ⚙️ How It Works
