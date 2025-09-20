@@ -122,6 +122,9 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 **Pipeline Flow:**  
 ![Pipeline Diagram](docs/pipeline.png)
 
+**Docker Container Architecture:**  
+![Docker Architecture](docs/docker_container.png)
+
 **Source Schema (MySQL)**
 ![Source Schema](docs/schema_source.png)
 
