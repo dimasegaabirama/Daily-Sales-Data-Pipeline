@@ -138,6 +138,37 @@ This shows sample visualizations based on the data loaded into Snowflake and tra
 ![Power BI Dashboard](docs/powerbi_dashboard.png)
 
 ---
+
+## 🗄️ Data Modeling
+
+This project follows a Kimball-style dimensional modeling approach:
+
+- **Source Schema (MySQL)**
+Contains operational data from the retail system. Includes both master data and transactions:
+  - `products`, `suppliers`, `warehouses`, `customers`
+  - `orders`, `order_items`, `shipments`, `inventory`, `sales`
+
+- **Warehouse Schema (Snowflake)**
+Modeled into dimensions and facts for analytics:
+
+  - Dimensions
+    - `dim_date` → calendar table
+    - `dim_products`, `dim_suppliers`, `dim_warehouse` → master entities
+
+  - Facts
+    - `fact_orders` → customer order records
+    - `fact_sales` → sales transactions
+    - `fact_shipments` → logistics and delivery
+    - `fact_inventory` → stock levels by warehouse and product
+
+  - Snapshots (dbt)
+  Track historical changes of slowly changing dimensions (SCD Type 2):
+    - `dim_product_snapshot` → track product detail changes (e.g., category, price)
+    - `dim_supplier_snapshot` → track supplier info changes
+    - `dim_warehouse_snapshot` → track warehouse attributes
+
+---
+
 ## 🔑 Portfolio Highlights
 
 - Demonstrates end-to-end retail data pipeline
