@@ -23,7 +23,7 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 
 ---
 
-## 📂 Struktur Proyek
+## 📂 Project Structure
 ```bash
 .
 ├── airflow/
