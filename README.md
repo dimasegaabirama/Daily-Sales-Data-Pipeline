@@ -83,6 +83,11 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │       ├── package-lock.yml
 │       ├── packages.yml
 │       └── profiles.yml
+│
+├── docs/
+│   ├── pipeline.png
+│   └── schema_source.png
+│
 ├── .gitignore
 └── README.md
 ```
