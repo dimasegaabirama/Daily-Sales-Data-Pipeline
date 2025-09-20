@@ -85,8 +85,10 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │       └── profiles.yml
 │
 ├── docs/
+│   ├── docker_container.png
 │   ├── pipeline.png
-│   └── schema_source.png
+│   ├── schema_source.png
+│   └── schema_warehouse.png
 │
 ├── .gitignore
 └── README.md
