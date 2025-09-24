@@ -29,7 +29,7 @@ default_args = {
     default_args=default_args,
     dagrun_timeout=pendulum.duration(minutes=30),
     max_active_runs=1,              # DAG run yang boleh aktif
-    max_active_tasks=2,             # TI yg boleh aktif pda 1 dag run
+    max_active_tasks=5,             # TI yg boleh aktif pda 1 dag run
     max_consecutive_failed_dag_runs=2,
     tags=["dbt", "daily_sales"]
 )
@@ -41,7 +41,10 @@ def daily_sales():
     secret_file = Path(Variable.get("secret_file", default_var=None))
     
     sql_file = Variable.get("sql_file", default_var=None, deserialize_json=True)
-    create_schema = Path(sql_file["create_table"])
+    
+    create_schema = Path(sql_file["create_schema"])
+    fact_queries = Path(sql_file["fact_queries"])
+    dim_queries = Path(sql_file["dim_queries"])
 
     # koneksi database
     snowflake_conn = get_snowflake_conn(secret_file)

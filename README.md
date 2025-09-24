@@ -40,7 +40,18 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │   │   │   ├── transform.py
 │   │   │   └── utils.py 
 │   │   └── sql/
-│   │       └── create_table.sql
+│   │       ├── create_table.sql
+│   │       ├── dimension/
+│   │       │   ├── products.sql
+│   │       │   ├── suppliers.sql
+│   │       │   └── warehouses.sql
+│   │       └── fact/
+│   │           ├── orderitems.sql
+│   │           ├── orders.sql
+│   │           ├── sales.sql
+│   │           ├── shipmentitems.sql
+│   │           ├── shipments.sql
+│   │           └── stock.sql
 │   ├── tests/
 │   │   └── dags/
 │   │       └── test_dag_example.py
