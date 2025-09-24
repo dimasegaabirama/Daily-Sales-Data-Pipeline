@@ -56,7 +56,7 @@ def daily_sales():
 
     @task(max_active_tis_per_dag=1)
     def load_dimension():
-        elt_pipeline(table_names = table_dimension,
+        elt_pipeline(path_file = dim_queries,
                      source_conn = database_conn,
                      snowflake_conn = snowflake_conn,
                      schema = "landing",
@@ -65,85 +65,11 @@ def daily_sales():
 
     @task(max_active_tis_per_dag=1)
     def load_fact():
-        queries = {
-            "orderitems": """
-                WITH cte_order AS (
-                    SELECT orderid
-                    FROM RETAIL_SUPPLY_CHAIN.Orders 
-                    WHERE orderdate BETWEEN '{{ prev_ds }}' AND '{{ ds }}'
-                )
-                SELECT
-                    oi.OrderItemID,
-                    oi.OrderID,
-                    oi.ProductID,
-                    oi.Quantity,
-                    oi.Price
-                FROM RETAIL_SUPPLY_CHAIN.OrderItems oi 
-                WHERE oi.OrderID IN (SELECT orderid FROM cte_order)
-                """,
-            "orders": """
-                WITH cte_order AS (
-                    SELECT 
-                        orderid,
-                        orderdate,
-                        customername,
-                        customeraddress
-                    FROM RETAIL_SUPPLY_CHAIN.Orders o 
-                    WHERE orderdate BETWEEN '{{ prev_ds }}' AND '{{ ds }}'
-                )
-                SELECT * FROM cte_order
-                """,
-            "sales": """
-                SELECT
-                    s.SaleID,
-                    s.SaleDate,
-                    s.ProductID,
-                    s.Quantity,
-                    s.TotalAmount
-                FROM RETAIL_SUPPLY_CHAIN.Sales s 
-                WHERE s.SaleDate BETWEEN '{{ prev_ds }}' AND '{{ ds }}'
-                """,
-            "shipmentitems": """
-                WITH cte_shipment AS (
-                    SELECT ShipmentID
-                    FROM RETAIL_SUPPLY_CHAIN.Shipments 
-                    WHERE ShipmentDate BETWEEN '{{ prev_ds }}' AND '{{ ds }}'
-                )
-                SELECT 
-                    si.ShipmentItemID,
-                    si.ShipmentID,
-                    si.ProductID,
-                    si.Quantity
-                FROM RETAIL_SUPPLY_CHAIN.ShipmentItems si 
-                WHERE si.ShipmentID IN (SELECT ShipmentID FROM cte_shipment)   
-                """,
-            "shipments": """
-                WITH cte_shipment AS (
-                    SELECT
-                        ShipmentID,
-                        SupplierID,
-                        WarehouseID,
-                        ShipmentDate
-                    FROM RETAIL_SUPPLY_CHAIN.Shipments 
-                    WHERE ShipmentDate BETWEEN '{{ prev_ds }}' AND '{{ ds }}'
-                )
-                SELECT * FROM cte_shipment
-                """,
-            "stock": """
-                SELECT 
-                    ss.WarehouseID,
-                    ss.ProductID,
-                    ss.Quantity
-                FROM RETAIL_SUPPLY_CHAIN.Stock ss
-                """
-        }
-
-        elt_pipeline(table_names = table_fact,
+        elt_pipeline(path_file = fact_queries,
                      source_conn = database_conn,
                      snowflake_conn = snowflake_conn,
                      schema = "landing",
-                     type = "fact", 
-                     queries = queries
+                     type = "fact",
                      )
 
     @task_group(group_id="dbt_run_group")

@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional, Dict
 
 from sqlalchemy.engine import Engine
 
@@ -14,8 +13,7 @@ def elt_pipeline(
     source_conn: Engine,
     snowflake_conn: Engine,
     schema: str = "RAW",
-    type: str = "dimension",
-    queries: Optional[Dict[str, str]] = None,
+    type: str = "dimension"
 ):
     """
     Run a simple ELT pipeline from a source database to Snowflake.
@@ -40,8 +38,6 @@ def elt_pipeline(
         schema (str, optional): Target Snowflake schema. Defaults to `"RAW"`.
         type (str, optional): Table type, must be `"dimension"` or `"fact"`. 
             Defaults to `"dimension"`.
-        queries (dict, optional): Additional queries (not required if using 
-            `.sql` files). Only used when `type="fact"`.
 
     Returns:
         None
