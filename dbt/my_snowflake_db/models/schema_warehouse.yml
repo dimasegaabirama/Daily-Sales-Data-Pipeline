@@ -9,7 +9,7 @@ sources:
     # loaded_at_file:
     tables:
       - name: products
-        description: "Table berisi data products"
+        description: "Source table that stores product data."
         columns:
           - name: ProductID
             tests: 
@@ -21,7 +21,7 @@ sources:
                   min_value: 0
 
       - name: warehouses
-        description: "Table berisi data warehouse"
+        description: "Source table that stores warehouse data."
         columns:
           - name: WarehouseID
             tests:
@@ -33,7 +33,7 @@ sources:
                   min_value: 0
 
       - name: suppliers
-        description: "Table berisi data suppliers"
+        description: "Source table that stores supplier data."
         columns:
           - name: SupplierID
             tests:
@@ -45,7 +45,7 @@ sources:
                   regex: '^.+@.+\..+$'
 
       - name: shipments
-        description: "Table berisi data shipments"
+        description: "Source table that stores shipment data."
         columns:
           - name: ShipmentID
             tests:
@@ -62,7 +62,7 @@ sources:
               - not_null
 
       - name: shipmentitems
-        description: "Table berisi data shipmentitems"
+        description: "Source table containing detailed records of items included in each shipment."
         columns:
           - name: ShipmentItemID
             tests:
@@ -81,7 +81,7 @@ sources:
               - not_null
 
       - name: stock
-        description: "Table berisi data stock"
+        description: "Source table containing raw stock information for each product in each warehouse."
         columns:
           - name: WarehouseID
             tests:
@@ -96,7 +96,7 @@ sources:
               - not_null
 
       - name: sales
-        description: "Table berisi data sales"
+        description: "Source table that stores sales data."
         columns:
           - name: SaleID
             tests:
@@ -120,7 +120,7 @@ sources:
               - not_null
 
       - name: orders
-        description: "Table berisi data orders"
+        description: "Source table that stores order data."
         columns:
           - name: OrderID
             tests:
@@ -131,7 +131,7 @@ sources:
               - not_null
 
       - name: orderitems
-        description: "Table berisi data orderitems"
+        description: "Source table containing detailed records of items in each order."
         columns:
           - name: OrderItemID
             tests:
@@ -156,7 +156,7 @@ sources:
 
 models:
   - name: dim_date
-    description: "Table berisi data dimensi tanggal"
+    description: "Dimension table containing calendar dates and related attributes (day, month, quarter, year, etc.)."
     columns:
       - name: id
         tests:
@@ -184,17 +184,14 @@ models:
               min_value: 1
               max_value: 4
       - name: month_name
-        description: "Nama bulan"
         tests:
           - validate_in_set:
               value: "('january','february','march','april','may','june','july','august','september','october','november','december')"
       - name: weekday_name
-        description: "Nama hari"
         tests:
           - validate_in_set:
               value: "('sun','mon','tue','wed','thu','fri','sat')"
       - name: day_type
-        description: "Tipe hari"
         tests:
           - validate_in_set:
               value: "('weekday','weekend')"
@@ -206,7 +203,7 @@ models:
               max_value: 31
 
   - name: dim_products
-    description: "Table berisi data produk"
+    description: "Dimension table that stores product information."
     columns:
       - name: product_name
         tests:
@@ -217,7 +214,7 @@ models:
               value: "('home','clothing')"
 
   - name: dim_suppliers
-    description: "Table berisi data supplier"
+    description: "Dimension table that stores supplier information."
     columns:
       - name: supplier_id
         tests:
@@ -234,7 +231,7 @@ models:
           - check_trim_lower
 
   - name: dim_warehouses
-    description: "Table berisi data gudang"
+    description: "Dimension table that stores warehouse information."
     columns:
       - name: warehouse_id
         tests:
@@ -247,7 +244,7 @@ models:
               value: "('london','manchester','birmingham','glasgow','liverpool','leeds')"
 
   - name: fact_inventory
-    description: "Table berisi data inventory harian"
+    description: "Fact table that stores daily inventory levels for each product."
     tests:
       - validate_fact_inventory_arrays
     columns:
@@ -272,7 +269,7 @@ models:
           - dim_date_max_current_date
 
   - name: fact_orders
-    description: "Table berisi data pesanan"
+    description: "Table containing details of customer orders, including order date, customer, and related attributes."
     columns:
       - name: orderitem_id
         tests:
@@ -297,7 +294,7 @@ models:
           - dim_date_max_current_date
 
   - name: fact_sales
-    description: "Table berisi data penjualan"
+    description: "Table containing sales records, including transaction details, amounts, and related attributes."
     columns:
       - name: product_id
         tests:
@@ -312,7 +309,7 @@ models:
           - dim_date_max_current_date
 
   - name: fact_shipments
-    description: "Table berisi data pengiriman"
+    description: "Fact table containing records of product shipments."
     columns:
       - name: shipmentitem_id
         tests:
