@@ -290,25 +290,27 @@ Set up your Snowflake and MySQL connections in:
 
 Example:
 ```bash
-connections:
-  - conn_id: snowflake_conn
-    conn_type: snowflake
-    conn_login: <your_username>
-    conn_password: <your_password>
-    conn_schema: ANALYTICS
-    conn_extra:
-      account: <your_account>
-      warehouse: COMPUTE_WH
-      database: RETAIL_SUPPLY_CHAIN
-      role: <your_role>
+airflow:
+  connections:
+    - conn_id: retail_supply_chain
+      conn_type: mysql
+      conn_host: airflow_fb4c73-store_a-1
+      conn_schema: retail_supply_chain
+      conn_login: mysql
+      conn_password: mysql
+      conn_port: 3306
+      conn_extra: {}
 
-  - conn_id: mysql_source
-    conn_type: mysql
-    conn_host: mysql
-    conn_schema: retail_supply_chain
-    conn_login: root
-    conn_password: root
-    conn_port: 3306
+    - conn_id: warehouse
+      conn_type: snowflake
+      conn_schema: <your-database>
+      conn_login: <your-username>
+      conn_password: <your-password>
+      conn_extra:
+        account: <your-account>
+        role: <your-role>
+        warehouse: <your-warehouse>
+        schema: <your-schema>
 ```
 
 ---
