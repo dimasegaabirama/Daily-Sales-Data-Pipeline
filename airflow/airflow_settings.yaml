@@ -18,14 +18,14 @@ airflow:
 
     - conn_id: warehouse
       conn_type: snowflake
-      conn_schema: retail_supply_chain
-      conn_login: dims_service
-      conn_password: Icikiwirservisakun1214A
+      conn_schema: <your-database>
+      conn_login: <your-username>
+      conn_password: <your-password>
       conn_extra:
-        account: HHTHDDP-ZZ01818
-        role: ACCOUNTADMIN
-        warehouse: RETAIL_WH
-        schema: LANDING
+        account: <your-account>
+        role: <your-role>
+        warehouse: <your-warehouse>
+        schema: <your-schema>
 
   # pools:
   #   - pool_name:
