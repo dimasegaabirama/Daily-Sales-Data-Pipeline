@@ -299,7 +299,7 @@ connections:
     conn_port: 3306
 ```
 
-- 7️⃣ Start the Local Environment
+**7️⃣ Start the Local Environment**
 
 Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
 ```bash
@@ -313,7 +313,21 @@ Check that the containers are running:
 docker ps
 ```
 
-**8️⃣ Access the Airflow Web UI**
+**8️⃣ Start the Local Environment**
+
+Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
+```bash
+astro dev start
+```
+
+⏱️ Wait a few minutes for all containers to fully initialize.
+
+Check that the containers are running:
+```bash
+docker ps
+```
+
+**🔟 Access the Airflow Web UI**
 
 Once Airflow is up and running, open:
 ```bash
