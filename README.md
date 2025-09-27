@@ -268,13 +268,15 @@ my_snowflake_db:
   outputs:
     dev:
       type: snowflake
-      account: <your_account>
-      user: <your_username>
-      password: <your_password>
-      role: <your_role>
-      database: RETAIL_SUPPLY_CHAIN
-      warehouse: COMPUTE_WH
-      schema: ANALYTICS
+      account: <your-account>
+
+      user: <your-username>
+      password: <your-password>
+
+      role: <your-role>
+      database: <your-database>
+      warehouse: <your-warehouse>
+      schema: <your-schema>
       threads: 4
       client_session_keep_alive: False
 ```
