@@ -193,25 +193,24 @@ Modeled into dimensions and facts for analytics:
 
 Follow these steps to run the Daily Sales Data Pipeline locally using Docker and Astronomer (Astro CLI).
 
-- 1️⃣ Install Docker
+**1️⃣ Install Docker**
 Download and install Docker Desktop based on your operating system:
 
-Windows/Mac:
+- Windows/Mac:
 👉 https://www.docker.com/products/docker-desktop/
 
-Linux (Ubuntu):
+- Linux (Ubuntu):
 ```bash
 sudo apt update
 sudo apt install docker.io docker-compose -y
 sudo systemctl enable --now docker
 ```
-
 ✅ Verify your installation:
 ```bash
 docker ps
 ```
 
-- 2️⃣ Install Astro CLI
+**2️⃣ Install Astro CLI**
 
 Astro CLI is used to manage and run Apache Airflow locally with Docker.
 
@@ -219,42 +218,38 @@ Install via the official script:
 ```bash
 curl -sSL https://install.astronomer.io | bash
 ```
-
 Confirm that Astro is successfully installed:
 ```bash
 astro version
 ```
 
-- 3️⃣ Pull Required Docker Images
+**3️⃣ Pull Required Docker Images**
 
 This project relies on the following Docker images:
 
-**ghcr.io/dbt-labs/dbt-snowflake** → runs dbt transformations
-
-**mysql:8.0.42-debian** → serves as the operational (source) database
-
-**Airflow image** → automatically provided by Astronomer
+  - **ghcr.io/dbt-labs/dbt-snowflake** → runs dbt transformations
+  - **mysql:8.0.42-debian** → serves as the operational (source) database
+  - **Airflow image** → automatically provided by Astronomer
 
 Pull the images manually:
 ```bash
 docker pull ghcr.io/dbt-labs/dbt-snowflake
 docker pull mysql:8.0.42-debian
 ```
+⚠️ The Airflow image is automatically handled by Astronomer when running ```astro dev start```.
 
-- 4️⃣ (Optional) Initialize an Astro Project
+**4️⃣ (Optional) Initialize an Astro Project**
 
 If you haven’t initialized an Airflow project yet, run:
 ```bash
 astro dev init
 ```
-
 This command creates the necessary project structure and default configuration files for Astronomer.
 
-- 5️⃣ Configure Snowflake Credentials → profiles.yml
+**5️⃣ Configure Snowflake Credentials →** ```profiles.yml```
 
 Update your Snowflake account credentials in:
-
-dbt/my_snowflake_db/profiles.yml
+```dbt/my_snowflake_db/profiles.yml```
 
 Example:
 ```bash
@@ -276,11 +271,10 @@ my_snowflake_db:
 
 🔒 Important: Do not commit this file to GitHub since it contains your Snowflake credentials.
 
-- 6️⃣ Configure Airflow Connections → airflow_settings.yml
+**6️⃣ Configure Airflow Connections →** ```airflow_settings.yml```
 
 Set up your Snowflake and MySQL connections in:
-
-airflow/airflow_settings.yml
+```airflow/airflow_settings.yml```
 
 Example:
 ```bash
@@ -319,7 +313,7 @@ Check that the containers are running:
 docker ps
 ```
 
-- 8️⃣ Access the Airflow Web UI
+**8️⃣ Access the Airflow Web UI**
 
 Once Airflow is up and running, open:
 ```bash
@@ -334,7 +328,7 @@ Password: admin
 
 After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
 
-- 9️⃣ (Optional) Load Sample Data into MySQL
+**9️⃣ (Optional) Load Sample Data into MySQL**
 
 To populate the MySQL database with sample data for testing:
 ```bash
@@ -345,17 +339,14 @@ docker exec -i <mysql_container_name> mysql -uroot -proot retail_supply_chain < 
 
 Your pipeline will now automatically:
 
-Create schemas and tables in Snowflake
-
-Extract data from MySQL
-
-Load raw data into the landing schema
-
-Run dbt transformations and snapshots
-
-Perform dbt model testing
+  - Create schemas and tables in Snowflake
+  - Extract data from MySQL
+  - Load raw data into the landing schema
+  - Run dbt transformations and snapshots
+  - Perform dbt model testing
 
 ⚡ Quick Summary (Cheat Sheet)
+```bash 
 # 1. Install Docker & Astro CLI
 # 2. Pull required images
 docker pull mysql:8.0.42-debian
@@ -365,11 +356,9 @@ docker pull ghcr.io/dbt-labs/dbt-snowflake
 # - dbt/my_snowflake_db/profiles.yml
 # - airflow/airflow_settings.yml
 
-# 4. Start environment
+# 4. Start the environment
 astro dev start
 
 # 5. Open Airflow UI
 http://localhost:8080
-
-
-Would you like me to add a short "Troubleshooting" section next (e.g. common issues like Snowflake connection errors, dbt command not found, or Airflow import failures)? It’s a great final touch for a professional README.
+```
