@@ -193,6 +193,8 @@ Modeled into dimensions and facts for analytics:
 
 Follow these steps to run the Daily Sales Data Pipeline locally using Docker and Astronomer (Astro CLI).
 
+---
+
 **1️⃣ Install Docker**
 Download and install Docker Desktop based on your operating system:
 
@@ -210,6 +212,8 @@ sudo systemctl enable --now docker
 docker ps
 ```
 
+---
+
 **2️⃣ Install Astro CLI**
 
 Astro CLI is used to manage and run Apache Airflow locally with Docker.
@@ -222,6 +226,8 @@ Confirm that Astro is successfully installed:
 ```bash
 astro version
 ```
+
+---
 
 **3️⃣ Pull Required Docker Images**
 
@@ -238,6 +244,8 @@ docker pull mysql:8.0.42-debian
 ```
 ⚠️ The Airflow image is automatically handled by Astronomer when running ```astro dev start```.
 
+---
+
 **4️⃣ (Optional) Initialize an Astro Project**
 
 If you haven’t initialized an Airflow project yet, run:
@@ -245,6 +253,8 @@ If you haven’t initialized an Airflow project yet, run:
 astro dev init
 ```
 This command creates the necessary project structure and default configuration files for Astronomer.
+
+---
 
 **5️⃣ Configure Snowflake Credentials →** ```profiles.yml```
 
@@ -270,6 +280,8 @@ my_snowflake_db:
 ```
 
 🔒 Important: Do not commit this file to GitHub since it contains your Snowflake credentials.
+
+---
 
 **6️⃣ Configure Airflow Connections →** ```airflow_settings.yml```
 
@@ -299,6 +311,8 @@ connections:
     conn_port: 3306
 ```
 
+---
+
 **7️⃣ Start the Local Environment**
 
 Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
@@ -313,6 +327,8 @@ Check that the containers are running:
 docker ps
 ```
 
+---
+
 **8️⃣ Import Airflow Connections and Variables**
 
 Once the containers are up, import the pre-configured Airflow settings (connections, variables, etc.) from the file ```airflow_settings.yaml```:
@@ -323,6 +339,8 @@ astro dev object import
   - Snowflake connection
   - MySQL connection
   - Variables like secret_file, sql_file, and others
+
+---
 
 **🔟 Access the Airflow Web UI**
 
@@ -340,6 +358,7 @@ Password: admin
 After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
 
 ---
+
 ✅ Done!
 
 Your pipeline will now automatically:
@@ -367,4 +386,5 @@ astro dev start
 # 5. Open Airflow UI
 http://localhost:8080
 ```
+
 ---
