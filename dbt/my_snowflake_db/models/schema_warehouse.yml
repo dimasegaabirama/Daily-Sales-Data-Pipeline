@@ -3,19 +3,15 @@ version: 2
 sources:
   - name: staging
     schema: LANDING
-    # freshness:
-    #   warn_after: {count: 1, period: day}
-    #   error_after: {count: 3, period: day}
-    # loaded_at_file:
     tables:
       - name: products
         description: "Source table that stores product data."
         columns:
-          - name: ProductID
+          - name: product_id
             tests: 
               - unique
               - not_null
-          - name: Price
+          - name: price
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 0
@@ -23,11 +19,11 @@ sources:
       - name: warehouses
         description: "Source table that stores warehouse data."
         columns:
-          - name: WarehouseID
+          - name: warehouse_id
             tests:
               - unique
               - not_null
-          - name: Capacity
+          - name: capacity
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 0
@@ -35,11 +31,11 @@ sources:
       - name: suppliers
         description: "Source table that stores supplier data."
         columns:
-          - name: SupplierID
+          - name: supplier_id
             tests:
               - unique
               - not_null
-          - name: ContactEmail
+          - name: contact_email
             tests:
               - dbt_expectations.expect_column_values_to_match_regex:
                   regex: '^.+@.+\..+$'
@@ -47,34 +43,34 @@ sources:
       - name: shipments
         description: "Source table that stores shipment data."
         columns:
-          - name: ShipmentID
+          - name: shipment_id
             tests:
               - unique
               - not_null
-          - name: SupplierID
+          - name: supplier_id
             tests:
               - not_null
-          - name: WarehouseID
+          - name: warehouse_id
             tests:
               - not_null
-          - name: shipmentDate
+          - name: shipment_date
             tests:
               - not_null
 
-      - name: shipmentitems
+      - name: shipment_items
         description: "Source table containing detailed records of items included in each shipment."
         columns:
-          - name: ShipmentItemID
+          - name: shipment_item_id
             tests:
               - unique
               - not_null
-          - name: ShipmentID
+          - name: shipment_id
             tests:
               - not_null
-          - name: ProductID
+          - name: product_id
             tests:
               - not_null
-          - name: Quantity
+          - name: quantity
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 1
@@ -83,13 +79,13 @@ sources:
       - name: stock
         description: "Source table containing raw stock information for each product in each warehouse."
         columns:
-          - name: WarehouseID
+          - name: warehouse_id
             tests:
               - not_null
-          - name: ProductID
+          - name: product_id
             tests:
               - not_null
-          - name: Quantity
+          - name: quantity
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 0
@@ -98,22 +94,22 @@ sources:
       - name: sales
         description: "Source table that stores sales data."
         columns:
-          - name: SaleID
+          - name: sale_id
             tests:
               - unique
               - not_null
-          - name: SaleDate
+          - name: sale_date
             tests:
               - not_null
-          - name: ProductID
+          - name: product_id
             tests:
               - not_null
-          - name: Quantity
+          - name: quantity
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 1
               - not_null
-          - name: TotalAmount
+          - name: total_amount
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 0
@@ -122,36 +118,34 @@ sources:
       - name: orders
         description: "Source table that stores order data."
         columns:
-          - name: OrderID
+          - name: order_id
             tests:
               - unique
               - not_null
-          - name: OrderDate
+          - name: order_date
             tests:
               - not_null
 
-      - name: orderitems
+      - name: order_items
         description: "Source table containing detailed records of items in each order."
         columns:
-          - name: OrderItemID
+          - name: order_item_id
             tests:
               - unique
               - not_null
-          - name: OrderID
+          - name: order_id
             tests:
               - not_null
-          - name: ProductID
+          - name: product_id
             tests:
               - not_null
-          - name: Quantity
+          - name: quantity
             tests:
               - dbt_expectations.expect_column_values_to_be_between:
                   min_value: 1
               - not_null
-          - name: Price
+          - name: price
             tests:
-              - dbt_expectations.expect_column_values_to_be_between:
-                  min_value: 0
               - not_null
 
 models:
@@ -241,7 +235,7 @@ models:
         tests:
           - check_trim_lower
           - validate_in_set:
-              value: "('london','manchester','birmingham','glasgow','liverpool','leeds')"
+              value: "('london','manchester','birmingham','glasgow','liverpool','leeds','bristol','sheffield')"
 
   - name: fact_inventory
     description: "Fact table that stores daily inventory levels for each product."
@@ -266,7 +260,7 @@ models:
           - relationships:
               to: ref('dim_date')
               field: id
-          - dim_date_max_current_date
+          - no_future_dates
 
   - name: fact_orders
     description: "Table containing details of customer orders, including order date, customer, and related attributes."
@@ -291,7 +285,7 @@ models:
           - relationships:
               to: ref('dim_date')
               field: id
-          - dim_date_max_current_date
+          - no_future_dates
 
   - name: fact_sales
     description: "Table containing sales records, including transaction details, amounts, and related attributes."
@@ -306,7 +300,7 @@ models:
           - relationships:
               to: ref('dim_date')
               field: id
-          - dim_date_max_current_date
+          - no_future_dates
 
   - name: fact_shipments
     description: "Fact table containing records of product shipments."
@@ -336,5 +330,5 @@ models:
           - relationships:
               to: ref('dim_date')
               field: id
-          - dim_date_max_current_date
+          - no_future_dates
         

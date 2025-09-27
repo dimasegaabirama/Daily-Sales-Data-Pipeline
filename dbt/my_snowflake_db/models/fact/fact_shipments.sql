@@ -6,14 +6,14 @@ config(
 }}
 
 SELECT
-   si.ShipmentItemID AS shipmentitem_id,
-   s.SupplierID AS supplier_id,
-   s.WarehouseID AS warehouse_id,
-   si.ProductID AS product_id,
-   si.Quantity AS quantity,
+   ABS(si.shipment_item_id) AS shipmentitem_id,
+   ABS(s.supplier_id) AS supplier_id,
+   ABS(s.warehouse_id) AS warehouse_id,
+   ABS(si.product_id) AS product_id,
+   ABS(si.quantity) AS quantity,
    d.id AS shipmentdate_id
-FROM {{ source("staging", "shipments") }} s INNER JOIN {{ source("staging", "shipmentitems") }} si 
-ON s.shipmentid = si.shipmentid LEFT JOIN {{ ref("dim_date") }} d ON s.shipmentdate = d.dt
+FROM {{ source("staging", "shipments") }} s INNER JOIN {{ source("staging", "shipment_items") }} si 
+ON s.shipment_id = si.shipment_id LEFT JOIN {{ ref("dim_date") }} d ON s.shipment_date = d.dt
 
 {% if is_incremental() %}
 WHERE d.id >= (SELECT COALESCE(MAX(shipmentdate_id), 0) FROM {{ this }})

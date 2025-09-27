@@ -14,9 +14,9 @@ WITH latest AS (
 ),
 stock_agg AS (
     SELECT
-        s.WarehouseID AS warehouse_id,
-        s.ProductID AS product_id,
-        SUM(s.Quantity) AS total_stock,
+        ABS(s.warehouse_id) AS warehouse_id,
+        ABS(s.product_id) AS product_id,
+        SUM(s.quantity) AS total_stock,
         d.id AS snapshotdate_id
     FROM {{ source("staging", "stock") }} s
     JOIN {{ ref("dim_date") }} d
@@ -25,7 +25,7 @@ stock_agg AS (
     {% if is_incremental() %}
     WHERE d.id > latest.max_snapshot
     {% endif %}
-    GROUP BY s.WarehouseID, s.ProductID, d.id
+    GROUP BY s.warehouse_id, s.product_id, d.id
 )
 
 SELECT
@@ -36,3 +36,4 @@ SELECT
     snapshotdate_id
 FROM stock_agg
 GROUP BY warehouse_id, snapshotdate_id
+ORDER BY snapshotdate_id, warehouse_id

@@ -102,7 +102,7 @@ def insert_snowflake(table, conn, keys, data_iter):
 
     conn.execute(insert_sql + placeholders, values)
 
-def make_dbt_task(task_id: str, command: list):
+def make_dbt_task(task_id: str, command: list, project_path, profile_path):
     """
     Create an Airflow task using DockerOperator to execute dbt commands.
 
@@ -131,10 +131,6 @@ def make_dbt_task(task_id: str, command: list):
         ...     command=["run", "--models", "stg_*"]
         ... )
     """
-
-    dbt_path = Variable.get("dbt_path", default_var=None, deserialize_json=True)
-    profile_path = dbt_path["profile_path"]
-    project_path = dbt_path["project_path"]
 
     return DockerOperator(
                         task_id=task_id,

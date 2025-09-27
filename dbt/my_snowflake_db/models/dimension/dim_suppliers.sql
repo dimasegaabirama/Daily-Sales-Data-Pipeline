@@ -6,8 +6,8 @@ config(
 }}
 
 SELECT 
-   SupplierID as supplier_id,
-   LOWER(TRIM(Name)) as supplier_name, 
-   LOWER(TRIM(ContactName)) as contact_name, 
-   LOWER(TRIM(ContactEmail)) as contact_email
+   ABS(supplier_id) as supplier_id,
+   LOWER(TRIM(name)) as supplier_name, 
+   LOWER(TRIM(contact_name)) as contact_name, 
+   LOWER(TRIM(contact_email)) as contact_email
 FROM {{ source("staging", "suppliers") }}

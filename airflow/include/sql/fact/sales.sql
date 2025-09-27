@@ -1,8 +1,8 @@
 SELECT
-    s.SaleID,
-    s.SaleDate,
-    s.ProductID,
-    s.Quantity,
-    s.TotalAmount
-FROM RETAIL_SUPPLY_CHAIN.Sales s 
-WHERE s.SaleDate BETWEEN '{ prev_ds }' AND '{ ds }'
+    s.sale_id,
+    s.sale_date,
+    s.product_id,
+    s.quantity,
+    s.total_amount
+FROM retail_supply_chain.sales s
+WHERE s.sale_date BETWEEN '{prev_ds}' AND '{ds}';

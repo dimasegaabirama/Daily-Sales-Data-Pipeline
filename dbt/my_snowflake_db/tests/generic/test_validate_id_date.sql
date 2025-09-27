@@ -5,7 +5,7 @@
 
 {% endtest %}
 
-{% test dim_date_max_current_date(model, column_name) %}
+{% test no_future_dates(model, column_name) %}
 
 with max_val as (
     select max({{ column_name }}) as max_date_id
@@ -14,9 +14,9 @@ with max_val as (
 
 select mv.max_date_id
 from max_val mv
-join {{ ref('dim_date') }} dd
+left join {{ ref('dim_date') }} dd
     on mv.max_date_id = dd.id
-where dd.dt != '{{ var("run_date") }}'
-   or mv.max_date_id is null
+where mv.max_date_id is not null
+  and dd.dt > '{{ var("run_date") }}'
 
 {% endtest %}

@@ -3,14 +3,14 @@ my_snowflake_db:
   outputs:
     dev:
       type: snowflake
-      account: account
+      account: <your-account>
 
-      user: user
-      password: password
+      user: <your-username>
+      password: <your-password>
 
-      role: role
-      database: database
-      warehouse: warehouse
-      schema: schema
+      role: <your-role>
+      database: <your-database>
+      warehouse: <your-warehouse>
+      schema: <your-schema>
       threads: 4
       client_session_keep_alive: False

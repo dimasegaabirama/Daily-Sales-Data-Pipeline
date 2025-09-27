@@ -1,16 +1,15 @@
 WITH cte_shipment AS (
     SELECT
-        ShipmentID,
-        SupplierID,
-        WarehouseID,
-        ShipmentDate
-    FROM RETAIL_SUPPLY_CHAIN.Shipments 
-    WHERE ShipmentDate BETWEEN '{ prev_ds }' AND '{ ds }'
-    )
-
+        shipment_id,
+        supplier_id,
+        warehouse_id,
+        shipment_date
+    FROM retail_supply_chain.shipments
+    WHERE shipment_date BETWEEN '{prev_ds}' AND '{ds}'
+)
 SELECT
-    ShipmentID,
-    SupplierID,
-    WarehouseID,
-    ShipmentDate
-FROM cte_shipment
+    shipment_id,
+    supplier_id,
+    warehouse_id,
+    shipment_date
+FROM cte_shipment;

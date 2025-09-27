@@ -1,5 +1,5 @@
 SELECT 
-    ss.WarehouseID,
-    ss.ProductID,
-    ss.Quantity
-FROM RETAIL_SUPPLY_CHAIN.Stock ss
+    ss.warehouse_id,
+    ss.product_id,
+    ss.quantity
+FROM retail_supply_chain.stock ss;

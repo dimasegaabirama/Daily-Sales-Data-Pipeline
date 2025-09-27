@@ -29,10 +29,9 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 ├── airflow/
 │   ├── dags/
 │   │   └── daily_sales.py 
+│   ├── data_dummy/
+│   │   └── store_a.sql
 │   ├── include/
-│   │   ├── config/
-│   │   │   ├── .secrets.toml 
-│   │   │   └── airflow_settings.yaml
 │   │   ├── etl/
 │   │   │   ├── connection.py 
 │   │   │   ├── extract.py 
@@ -40,7 +39,7 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │   │   │   ├── transform.py
 │   │   │   └── utils.py 
 │   │   └── sql/
-│   │       ├── create_table.sql
+│   │       ├── create_schema.sql
 │   │       ├── dimension/
 │   │       │   ├── products.sql
 │   │       │   ├── suppliers.sql
@@ -56,6 +55,7 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │   │   └── dags/
 │   │       └── test_dag_example.py
 │   ├── .dockerignore
+│   ├── airflow_settings.yaml
 │   ├── docker-compose.override.yml
 │   ├── Dockerfile
 │   ├── packages.txt
@@ -189,3 +189,187 @@ Modeled into dimensions and facts for analytics:
 
 ---
 
+## ⚙️ Setup & Installation
+
+Follow these steps to run the Daily Sales Data Pipeline locally using Docker and Astronomer (Astro CLI).
+
+- 1️⃣ Install Docker
+Download and install Docker Desktop based on your operating system:
+
+Windows/Mac:
+👉 https://www.docker.com/products/docker-desktop/
+
+Linux (Ubuntu):
+```bash
+sudo apt update
+sudo apt install docker.io docker-compose -y
+sudo systemctl enable --now docker
+```
+
+✅ Verify your installation:
+```bash
+docker ps
+```
+
+- 2️⃣ Install Astro CLI
+
+Astro CLI is used to manage and run Apache Airflow locally with Docker.
+
+Install via the official script:
+```bash
+curl -sSL https://install.astronomer.io | bash
+```
+
+Confirm that Astro is successfully installed:
+```bash
+astro version
+```
+
+- 3️⃣ Pull Required Docker Images
+
+This project relies on the following Docker images:
+
+**ghcr.io/dbt-labs/dbt-snowflake** → runs dbt transformations
+
+**mysql:8.0.42-debian** → serves as the operational (source) database
+
+**Airflow image** → automatically provided by Astronomer
+
+Pull the images manually:
+```bash
+docker pull ghcr.io/dbt-labs/dbt-snowflake
+docker pull mysql:8.0.42-debian
+```
+
+- 4️⃣ (Optional) Initialize an Astro Project
+
+If you haven’t initialized an Airflow project yet, run:
+```bash
+astro dev init
+```
+
+This command creates the necessary project structure and default configuration files for Astronomer.
+
+- 5️⃣ Configure Snowflake Credentials → profiles.yml
+
+Update your Snowflake account credentials in:
+
+dbt/my_snowflake_db/profiles.yml
+
+Example:
+```bash
+my_snowflake_db:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: <your_account>
+      user: <your_username>
+      password: <your_password>
+      role: <your_role>
+      database: RETAIL_SUPPLY_CHAIN
+      warehouse: COMPUTE_WH
+      schema: ANALYTICS
+      threads: 4
+      client_session_keep_alive: False
+```
+
+🔒 Important: Do not commit this file to GitHub since it contains your Snowflake credentials.
+
+- 6️⃣ Configure Airflow Connections → airflow_settings.yml
+
+Set up your Snowflake and MySQL connections in:
+
+airflow/airflow_settings.yml
+
+Example:
+```bash
+connections:
+  - conn_id: snowflake_conn
+    conn_type: snowflake
+    conn_login: <your_username>
+    conn_password: <your_password>
+    conn_schema: ANALYTICS
+    conn_extra:
+      account: <your_account>
+      warehouse: COMPUTE_WH
+      database: RETAIL_SUPPLY_CHAIN
+      role: <your_role>
+
+  - conn_id: mysql_source
+    conn_type: mysql
+    conn_host: mysql
+    conn_schema: retail_supply_chain
+    conn_login: root
+    conn_password: root
+    conn_port: 3306
+```
+
+- 7️⃣ Start the Local Environment
+
+Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
+```bash
+astro dev start
+```
+
+⏱️ Wait a few minutes for all containers to fully initialize.
+
+Check that the containers are running:
+```bash
+docker ps
+```
+
+- 8️⃣ Access the Airflow Web UI
+
+Once Airflow is up and running, open:
+```bash
+http://localhost:8080
+```
+
+Default credentials (Astro):
+```bash
+Username: admin
+Password: admin
+```
+
+After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
+
+- 9️⃣ (Optional) Load Sample Data into MySQL
+
+To populate the MySQL database with sample data for testing:
+```bash
+docker exec -i <mysql_container_name> mysql -uroot -proot retail_supply_chain < airflow/data_dummy/store_a.sql
+```
+
+✅ Done!
+
+Your pipeline will now automatically:
+
+Create schemas and tables in Snowflake
+
+Extract data from MySQL
+
+Load raw data into the landing schema
+
+Run dbt transformations and snapshots
+
+Perform dbt model testing
+
+⚡ Quick Summary (Cheat Sheet)
+# 1. Install Docker & Astro CLI
+# 2. Pull required images
+docker pull mysql:8.0.42-debian
+docker pull ghcr.io/dbt-labs/dbt-snowflake
+
+# 3. Configure credentials
+# - dbt/my_snowflake_db/profiles.yml
+# - airflow/airflow_settings.yml
+
+# 4. Start environment
+astro dev start
+
+# 5. Open Airflow UI
+http://localhost:8080
+
+
+Would you like me to add a short "Troubleshooting" section next (e.g. common issues like Snowflake connection errors, dbt command not found, or Airflow import failures)? It’s a great final touch for a professional README.

@@ -12,6 +12,8 @@ def elt_pipeline(
     path_file: Path,
     source_conn: Engine,
     snowflake_conn: Engine,
+    prev_ds = None,
+    ds = None,
     schema: str = "RAW",
     type: str = "dimension"
 ):
@@ -72,7 +74,7 @@ def elt_pipeline(
                 raise ValueError(f"Query kosong di file {sql_file}")
 
             # Replace placeholders (Airflow-style macros bisa masuk di sini)
-            formatted_sql = sql_text.format(prev_ds="{{ prev_ds }}", ds="{{ ds }}")
+            formatted_sql = sql_text.format(prev_ds=prev_ds, ds=ds)
 
             df = extract_from_source(table_name, source_conn, query=formatted_sql)
 

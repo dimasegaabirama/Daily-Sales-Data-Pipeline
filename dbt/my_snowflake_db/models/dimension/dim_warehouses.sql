@@ -6,7 +6,7 @@ config(
 }}
 
 SELECT 
-   WarehouseID as warehouse_id, 
-   LOWER(TRIM(Location)) as location, 
-   Capacity as capacity
+   ABS(warehouse_id) as warehouse_id, 
+   LOWER(TRIM(location)) as location, 
+   ABS(capacity) as capacity
 FROM {{ source("staging","warehouses") }}

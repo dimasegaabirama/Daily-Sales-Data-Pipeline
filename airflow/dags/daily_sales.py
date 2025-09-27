@@ -11,6 +11,7 @@ from include.etl import (
 
 from airflow.decorators import dag, task, task_group
 from airflow.exceptions import AirflowFailException
+from airflow.operators.python import get_current_context
 from airflow.models import Variable
 
 
@@ -24,7 +25,7 @@ default_args = {
 
 @dag(
     start_date=pendulum.datetime(2025, 8, 29, tz=local_tz),
-    schedule=None,
+    schedule="@daily",
     catchup=False,
     default_args=default_args,
     dagrun_timeout=pendulum.duration(minutes=30),
@@ -34,21 +35,19 @@ default_args = {
     tags=["dbt", "daily_sales"]
 )
 def daily_sales():
-    table_dimension = ["products", "warehouses", "suppliers"]
-    table_fact = ["shipments", "shipmentitems", "orders", "orderitems", "sales", "stock"]
 
-    # path
-    secret_file = Path(Variable.get("secret_file", default_var=None))
-    
-    sql_file = Variable.get("sql_file", default_var=None, deserialize_json=True)
+    sql_file = Variable.get("sql_file", default_var=None, deserialize_json=True)    
+    dbt_path = Variable.get("dbt_path", default_var=None, deserialize_json=True)
     
     create_schema = Path(sql_file["create_schema"])
     fact_queries = Path(sql_file["fact_queries"])
     dim_queries = Path(sql_file["dim_queries"])
+    
+    profile_path = dbt_path["profile_path"]
+    project_path = dbt_path["project_path"]
 
-    # koneksi database
-    snowflake_conn = get_snowflake_conn(secret_file)
-    database_conn = get_database_conn(secret_file, "mysql")
+    snowflake_conn = get_snowflake_conn("warehouse")
+    database_conn = get_database_conn("retail_supply_chain", "mysql")
 
     @task()
     def create_table():
@@ -56,41 +55,63 @@ def daily_sales():
 
     @task(max_active_tis_per_dag=1)
     def load_dimension():
-        elt_pipeline(path_file = dim_queries,
-                     source_conn = database_conn,
-                     snowflake_conn = snowflake_conn,
-                     schema = "landing",
-                     type = "dimension"
-                     )
+        elt_pipeline(
+            path_file = dim_queries,
+            source_conn = database_conn,
+            snowflake_conn = snowflake_conn,
+            schema = "landing",
+            type = "dimension"
+            )
 
     @task(max_active_tis_per_dag=1)
     def load_fact():
-        elt_pipeline(path_file = fact_queries,
-                     source_conn = database_conn,
-                     snowflake_conn = snowflake_conn,
-                     schema = "landing",
-                     type = "fact",
-                     )
+        context = get_current_context()
+        ds = context["ds"]
 
-    @task_group(group_id="dbt_run_group")
+        try:
+            prev_ds = context["prev_ds"]
+        except KeyError:
+            prev_ds = str(pendulum.parse(ds).subtract(days=1).date())
+
+        print("ds:", ds)
+        print("prev_ds:", prev_ds)
+        
+        elt_pipeline(
+            path_file = fact_queries,
+            source_conn = database_conn,
+            snowflake_conn = snowflake_conn,
+            schema = "landing",
+            type = "fact",
+            prev_ds = prev_ds,
+            ds = ds
+            )
+        
+    @task_group(group_id = "dbt_run_group")
     def dbt_run_group():
-
         dbt_test_source = make_dbt_task(
-                        task_id="test_source",
-                        command=["test", "--select", "source:*"]
-                    )
+                        task_id = "test_source",
+                        command = ["test", "--select", "source:*"],
+                        profile_path = profile_path,
+                        project_path = project_path
+                        )
         dbt_run = make_dbt_task(
-                    task_id="run_task",
-                    command=["run"]
-                )
+                    task_id = "run_task",
+                    command = ["run"],
+                    profile_path = profile_path,
+                    project_path = project_path
+                    )
         dbt_test_model = make_dbt_task(
-                    task_id="test_model",
-                    command=["test", "--select", "path:models/*"]
-                )
+                    task_id = "test_model",
+                    command = ["test", "--select", "path:models/*"],
+                    profile_path = profile_path,
+                    project_path = project_path
+                    )
         dbt_snapshot = make_dbt_task(
-                    task_id="snapshot",
-                    command=["snapshot"]
-                )
+                    task_id = "snapshot",
+                    command = ["snapshot"],
+                    profile_path = profile_path,
+                    project_path = project_path
+                    )
 
         dbt_test_source >> dbt_run >> dbt_test_model >> dbt_snapshot
 
