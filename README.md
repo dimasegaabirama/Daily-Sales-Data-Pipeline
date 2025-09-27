@@ -339,13 +339,6 @@ Password: admin
 
 After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
 
-**9️⃣ (Optional) Load Sample Data into MySQL**
-
-To populate the MySQL database with sample data for testing:
-```bash
-docker exec -i <mysql_container_name> mysql -uroot -proot retail_supply_chain < airflow/data_dummy/store_a.sql
-```
-
 ✅ Done!
 
 Your pipeline will now automatically:
