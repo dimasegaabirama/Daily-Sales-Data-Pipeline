@@ -1,0 +1,49 @@
+# This file allows you to configure Airflow Connections, Pools, and Variables in a single place for local development only.
+# NOTE: json dicts can be added to the conn_extra field as yaml key value pairs. See the example below.
+
+# For more information, refer to our docs: https://www.astronomer.io/docs/astro/cli/develop-project#configure-airflow_settingsyaml-local-development-only
+# For questions, reach out to: https://support.astronomer.io
+# For issues create an issue ticket here: https://github.com/astronomer/astro-cli/issues
+
+airflow:
+  connections:
+    - conn_id: retail_supply_chain
+      conn_type: mysql
+      conn_host: airflow_fb4c73-store_a-1
+      conn_schema: retail_supply_chain
+      conn_login: mysql
+      conn_password: mysql
+      conn_port: 3306
+      conn_extra: {}
+
+    - conn_id: warehouse
+      conn_type: snowflake
+      conn_schema: retail_supply_chain
+      conn_login: dims_service
+      conn_password: Icikiwirservisakun1214A
+      conn_extra:
+        account: HHTHDDP-ZZ01818
+        role: ACCOUNTADMIN
+        warehouse: RETAIL_WH
+        schema: LANDING
+
+  # pools:
+  #   - pool_name:
+  #     pool_slot:
+  #     pool_description:
+
+  variables:
+    - variable_name: sql_file
+      variable_value: |
+        {
+          "create_schema": "/usr/local/airflow/include/sql/create_schema.sql", 
+          "fact_queries": "/usr/local/airflow/include/sql/fact", 
+          "dim_queries": "/usr/local/airflow/include/sql/dimension"
+        }
+
+    - variable_name: dbt_path
+      variable_value: |
+        {
+          "profile_path": "C:/Users/dimas/Desktop/Data Engineering/Portofolio/Airflow-DBT-Postgres/dbt/my_snowflake_db/profiles.yml",
+          "project_path": "C:/Users/dimas/Desktop/Data Engineering/Portofolio/Airflow-DBT-Postgres/dbt/my_snowflake_db"
+        }

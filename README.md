@@ -313,19 +313,16 @@ Check that the containers are running:
 docker ps
 ```
 
-**8️⃣ Start the Local Environment**
+**8️⃣ Import Airflow Connections and Variables**
 
-Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
+Once the containers are up, import the pre-configured Airflow settings (connections, variables, etc.) from the file ```airflow_settings.yaml```:
 ```bash
-astro dev start
+astro dev object import
 ```
-
-⏱️ Wait a few minutes for all containers to fully initialize.
-
-Check that the containers are running:
-```bash
-docker ps
-```
+✅ This automatically configures your Airflow environment with:
+  - Snowflake connection
+  - MySQL connection
+  - Variables like secret_file, sql_file, and others
 
 **🔟 Access the Airflow Web UI**
 
