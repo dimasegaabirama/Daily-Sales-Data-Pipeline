@@ -339,6 +339,7 @@ Password: admin
 
 After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
 
+---
 ✅ Done!
 
 Your pipeline will now automatically:
@@ -366,3 +367,4 @@ astro dev start
 # 5. Open Airflow UI
 http://localhost:8080
 ```
+---
