@@ -195,7 +195,8 @@ Follow these steps to run the Daily Sales Data Pipeline locally using Docker and
 
 ---
 
-**1️⃣ Install Docker**
+### **1️⃣ Install Docker**
+
 Download and install Docker Desktop based on your operating system:
 
 - Windows/Mac:
@@ -214,7 +215,7 @@ docker ps
 
 ---
 
-**2️⃣ Install Astro CLI**
+### **2️⃣ Install Astro CLI**
 
 Astro CLI is used to manage and run Apache Airflow locally with Docker.
 
@@ -229,7 +230,7 @@ astro version
 
 ---
 
-**3️⃣ Pull Required Docker Images**
+### **3️⃣ Pull Required Docker Images**
 
 This project relies on the following Docker images:
 
@@ -246,7 +247,7 @@ docker pull mysql:8.0.42-debian
 
 ---
 
-**4️⃣ (Optional) Initialize an Astro Project**
+### **4️⃣ (Optional) Initialize an Astro Project**
 
 If you haven’t initialized an Airflow project yet, run:
 ```bash
@@ -256,7 +257,7 @@ This command creates the necessary project structure and default configuration f
 
 ---
 
-**5️⃣ Configure Snowflake Credentials →** ```profiles.yml```
+### **5️⃣ Configure Snowflake Credentials →** ```profiles.yml```
 
 Update your Snowflake account credentials in:
 ```dbt/my_snowflake_db/profiles.yml```
@@ -285,7 +286,7 @@ my_snowflake_db:
 
 ---
 
-**6️⃣ Configure Airflow Connections →** ```airflow_settings.yml```
+### **6️⃣ Configure Airflow Connections →** ```airflow_settings.yml```
 
 Set up your Snowflake and MySQL connections in:
 ```airflow/airflow_settings.yml```
@@ -317,7 +318,7 @@ airflow:
 
 ---
 
-**7️⃣ Start the Local Environment**
+### **7️⃣ Start the Local Environment**
 
 Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
 ```bash
@@ -333,7 +334,7 @@ docker ps
 
 ---
 
-**8️⃣ Import Airflow Connections and Variables**
+### **8️⃣ Import Airflow Connections and Variables**
 
 Once the containers are up, import the pre-configured Airflow settings (connections, variables, etc.) from the file ```airflow_settings.yaml```:
 ```bash
@@ -346,7 +347,7 @@ astro dev object import
 
 ---
 
-**🔟 Access the Airflow Web UI**
+### **🔟 Access the Airflow Web UI**
 
 Once Airflow is up and running, open:
 ```bash
