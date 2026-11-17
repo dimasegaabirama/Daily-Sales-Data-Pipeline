@@ -1,43 +1,129 @@
-# 📊 Daily Sales Data Pipeline with Airflow, Snowflake, and dbt
+# Daily Sales Data Pipeline
 
-An ETL/ELT pipeline for **retail supply chain analytics**, built with:
+An end-to-end ETL/ELT pipeline for **retail supply chain analytics**, built with Apache Airflow, Snowflake, dbt, and MySQL.
 
-- **Apache Airflow** → workflow orchestrator  
-- **Snowflake** → main data warehouse  
-- **dbt (data build tool)** → transformation, snapshotting, testing  
-- **MySQL** → operational database as the data source  
+The pipeline extracts operational data from MySQL, loads it into Snowflake's landing schema, and uses dbt to transform, test, and snapshot the data for analytics.
 
----
+## Table of Contents
 
-## 🚀 Key Features
-- Automated schema and table creation in Snowflake  
-- Extract data from MySQL (dimension & fact tables)  
-- Load data into the *landing* schema in Snowflake using **Pandas + SQLAlchemy**  
-- Modular pipeline (`extract.py`, `load.py`, `connection.py`, etc.) → easy to maintain  
-- Configurable via **Airflow Variables** (`secret_file`, `sql_file`, etc.)  
-- **dbt tasks** automatically executed in a single task group:
-  - `test_source` → validate sources  
-  - `run` → run transformations  
-  - `test_model` → test model outputs  
-  - `snapshot` → perform snapshotting  
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Pipeline Workflow](#pipeline-workflow)
+- [Data Model](#data-model)
+- [Project Structure](#project-structure)
+- [Preview](#preview)
+- [Portfolio Highlights](#portfolio-highlights)
+- [Installation & Running](#installation--running)
 
----
+## Architecture
 
-## 📂 Project Structure
-```bash
+### Pipeline Flow
+
+![Pipeline Diagram](docs/pipeline.png)
+
+The pipeline is orchestrated by **Apache Airflow** and consists of the following stages:
+
+1. **MySQL** — operational database containing retail supply chain data, including products, suppliers, warehouses, orders, shipments, inventory, and sales.
+2. **Airflow** — schedules and orchestrates the extraction, loading, and dbt workflow.
+3. **Python ETL** — extracts data from MySQL and loads it into Snowflake using Pandas and SQLAlchemy.
+4. **Snowflake** — central data warehouse. Raw extracted data is loaded into the landing schema.
+5. **dbt** — transforms landing data into dimensional models, runs data tests, and creates snapshots to track historical changes.
+
+### Docker Architecture
+
+![Docker Container Architecture](docs/docker_container.png)
+
+The local development environment uses Docker to run the pipeline services. Astronomer (Astro CLI) manages the Airflow environment, while the MySQL source database and dbt execution environment provide the source and transformation components.
+
+## Tech Stack
+
+| Technology | Role |
+|---|---|
+| **Apache Airflow 2.x** | Workflow orchestration and scheduling |
+| **Snowflake** | Cloud data warehouse |
+| **dbt Core 1.x** | SQL transformations, data tests, and snapshots |
+| **MySQL** | Operational data source |
+| **Python 3.9+** | ETL development |
+| **Pandas** | Data handling during extraction and loading |
+| **SQLAlchemy** | Database connectivity |
+| **Docker** | Containerized local environment |
+| **Astronomer Astro CLI** | Local Airflow development environment |
+
+## Pipeline Workflow
+
+The `daily_sales.py` DAG orchestrates the end-to-end workflow.
+
+1. **Prepare the warehouse**
+   - Create the required Snowflake schemas and tables.
+2. **Extract source data**
+   - Read dimension and fact data from MySQL.
+3. **Load raw data**
+   - Load extracted data into the Snowflake `landing` schema using Pandas and SQLAlchemy.
+4. **Run dbt**
+   - `test_source` validates the source data.
+   - `run` executes dbt transformations.
+   - `test_model` validates the transformed models.
+   - `snapshot` captures historical changes in tracked entities.
+
+The dbt tasks are organized into a single Airflow task group.
+
+### Configuration
+
+Configuration is managed through:
+
+- **Airflow Variables** — paths and runtime settings such as `secret_file` and `sql_file`.
+- **`.secrets.toml`** — credentials and other sensitive configuration. This file must not be committed to Git.
+
+## Data Model
+
+The project follows a **Kimball-style dimensional modeling** approach.
+
+### Source Schema (MySQL)
+
+![Source Schema](docs/schema_source.png)
+
+The MySQL operational database contains master data and transactional data.
+
+- **Master data:** `products`, `suppliers`, `warehouses`, and `customers`.
+- **Transactional data:** `orders`, `order_items`, `shipments`, `shipment_items`, `inventory`, and `sales`.
+
+### Warehouse Schema (Snowflake)
+
+![Warehouse Schema](docs/schema_warehouse.png)
+
+Data is organized into dimensions and facts for analytical workloads.
+
+| Layer / Type | Models | Description |
+|---|---|---|
+| **Dimensions** | `dim_date`, `dim_products`, `dim_suppliers`, `dim_warehouse` | Calendar and master-data dimensions |
+| **Facts** | `fact_orders`, `fact_sales`, `fact_shipments`, `fact_inventory` | Order, sales, shipment, and inventory metrics |
+| **Snapshots** | `dim_product_snapshot`, `dim_supplier_snapshot`, `dim_warehouse_snapshot` | Track historical changes to selected dimension records using dbt snapshots (SCD Type 2) |
+
+### dbt Workflow
+
+The dbt project performs the following operations:
+
+- Source testing to validate data loaded into Snowflake.
+- Model execution to build dimension and fact tables.
+- Model testing to validate transformed outputs.
+- Snapshot execution to preserve historical changes to product, supplier, and warehouse records.
+
+## Project Structure
+
+```text
 .
 ├── airflow/
 │   ├── dags/
-│   │   └── daily_sales.py 
+│   │   └── daily_sales.py
 │   ├── data_dummy/
 │   │   └── store_a.sql
 │   ├── include/
 │   │   ├── etl/
-│   │   │   ├── connection.py 
-│   │   │   ├── extract.py 
-│   │   │   ├── load.py 
+│   │   │   ├── connection.py
+│   │   │   ├── extract.py
+│   │   │   ├── load.py
 │   │   │   ├── transform.py
-│   │   │   └── utils.py 
+│   │   │   └── utils.py
 │   │   └── sql/
 │   │       ├── create_schema.sql
 │   │       ├── dimension/
@@ -60,24 +146,23 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │   ├── Dockerfile
 │   ├── packages.txt
 │   └── requirements.txt
-│  
 ├── dbt/
 │   └── my_snowflake_db/
-│       ├── analyses/ 
+│       ├── analyses/
 │       ├── macros/
-│       │   └── generate_schema_name.sql  
+│       │   └── generate_schema_name.sql
 │       ├── models/
 │       │   ├── dimension/
 │       │   │   ├── dim_date.sql
 │       │   │   ├── dim_products.sql
 │       │   │   ├── dim_suppliers.sql
-│       │   │   └── dim_warehouse.sql
-│       │   ├── fact/
-│       │   │   ├── fact_inventory.sql
-│       │   │   ├── fact_orders.sql
-│       │   │   ├── fact_sales.sql
-│       │   │   └── fact_shipments.sql
-│       │   └── schema_warehouse.yml
+│       │   │   ├── dim_warehouse.sql
+│       │   │   └── schema_warehouse.yml
+│       │   └── fact/
+│       │       ├── fact_inventory.sql
+│       │       ├── fact_orders.sql
+│       │       ├── fact_sales.sql
+│       │       └── fact_shipments.sql
 │       ├── seeds/
 │       ├── snapshots/
 │       │   ├── dim_product_snapshot.sql
@@ -94,213 +179,152 @@ An ETL/ELT pipeline for **retail supply chain analytics**, built with:
 │       ├── package-lock.yml
 │       ├── packages.yml
 │       └── profiles.yml
-│
 ├── docs/
 │   ├── docker_container.png
 │   ├── pipeline.png
 │   ├── schema_source.png
-│   └── schema_warehouse.png
-│
+│   ├── schema_warehouse.png
+│   └── powerbi_dashboard.png
 ├── .gitignore
 └── README.md
 ```
----
 
-## ⚙️ How It Works
-- **Airflow DAG** (`daily_sales.py`) orchestrates the pipeline:
-    - Creates schemas/tables in Snowflake
-    - Extracts data from MySQL
-    - Loads raw data into Snowflake (landing schema)
-    - Executes dbt tasks for transformation, testing, and snapshotting
-- **Configuration** is managed via:
-    - Airflow Variables (paths & secrets)
-    - .secrets.toml for credentials (not committed to Git)
-- **dbt Project** handles transformations and quality checks, ensuring data is production-ready.
+## Preview
 
----
+### Power BI Dashboard
 
-## 🛠️ Tech Stack
+This dashboard presents sample visualizations based on data loaded into Snowflake and transformed using dbt.
 
-- Airflow `2.x`
-- Snowflake
-- dbt Core `1.x`
-- MySQL
-- Python `3.9+`
-- Pandas + SQLAlchemy
-
----
-
-## 📊 Pipeline, Database & BI Overview
-
-**Pipeline Flow:**  
-![Pipeline Diagram](docs/pipeline.png)
-
-**Docker Container Architecture:**  
-![Docker Architecture](docs/docker_container.png)
-
-**Source Schema (MySQL)**
-![Source Schema](docs/schema_source.png)
-
-**Warehouse Schema (Snowflake)**
-![Warehouse Schema](docs/schema_warehouse.png)
-
-**Dashboard:**  
-This shows sample visualizations based on the data loaded into Snowflake and transformed via dbt.  
 ![Power BI Dashboard](docs/powerbi_dashboard.png)
 
----
+## Portfolio Highlights
 
-## 🗄️ Data Modeling
+- End-to-end retail data pipeline from an operational MySQL database to a Snowflake data warehouse.
+- Workflow orchestration using Apache Airflow.
+- Modular Python ETL components for connection management, extraction, loading, and transformation.
+- Dimensional data modeling based on the Kimball approach.
+- dbt source tests, model tests, and snapshots for historical tracking.
+- Docker-based local development environment.
 
-This project follows a Kimball-style dimensional modeling approach:
-
-- **Source Schema (MySQL)**
-Contains operational data from the retail system. Includes both master data and transactions:
-  - `products`, `suppliers`, `warehouses`, `customers`
-  - `orders`, `order_items`, `shipments`, `inventory`, `sales`
-
-- **Warehouse Schema (Snowflake)**
-Modeled into dimensions and facts for analytics:
-
-  - Dimensions
-    - `dim_date` → calendar table
-    - `dim_products`, `dim_suppliers`, `dim_warehouse` → master entities
-
-  - Facts
-    - `fact_orders` → customer order records
-    - `fact_sales` → sales transactions
-    - `fact_shipments` → logistics and delivery
-    - `fact_inventory` → stock levels by warehouse and product
-
-  - Snapshots (dbt)
-  Track historical changes of slowly changing dimensions (SCD Type 2):
-    - `dim_product_snapshot` → track product detail changes (e.g., category, price)
-    - `dim_supplier_snapshot` → track supplier info changes
-    - `dim_warehouse_snapshot` → track warehouse attributes
-
----
-
-## 🔑 Portfolio Highlights
-
-- Demonstrates end-to-end retail data pipeline
-- Shows integration of Airflow, Snowflake, dbt, and Python ETL scripts
-- Includes modular ETL, snapshotting, and automated data quality testing
-- Fully documented and ready to showcase on GitHub
-
----
-
-## ⚙️ Setup & Installation
+## Installation & Running
 
 Follow these steps to run the Daily Sales Data Pipeline locally using Docker and Astronomer (Astro CLI).
 
----
+### Prerequisites
 
-### **1️⃣ Install Docker**
+- Docker Desktop (Windows/macOS) or Docker Engine (Linux).
+- Astronomer Astro CLI.
+- Git.
+- Snowflake account and credentials.
+- MySQL source database configuration.
 
-Download and install Docker Desktop based on your operating system:
+### 1. Install Docker
 
-- Windows/Mac:
-👉 https://www.docker.com/products/docker-desktop/
+Download and install Docker Desktop:
 
-- Linux (Ubuntu):
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+For Ubuntu:
+
 ```bash
 sudo apt update
 sudo apt install docker.io docker-compose -y
 sudo systemctl enable --now docker
 ```
-✅ Verify your installation:
+
+Verify the installation:
+
 ```bash
 docker ps
 ```
 
----
-
-### **2️⃣ Install Astro CLI**
+### 2. Install Astro CLI
 
 Astro CLI is used to manage and run Apache Airflow locally with Docker.
 
-Install via the official script:
 ```bash
 curl -sSL https://install.astronomer.io | bash
 ```
-Confirm that Astro is successfully installed:
+
+Verify the installation:
+
 ```bash
 astro version
 ```
 
----
+### 3. Pull Required Docker Images
 
-### **3️⃣ Pull Required Docker Images**
+The project uses the following images:
 
-This project relies on the following Docker images:
+- `ghcr.io/dbt-labs/dbt-snowflake` — runs dbt transformations.
+- `mysql:8.0.42-debian` — runs the operational source database.
+- Airflow image — managed by Astronomer.
 
-  - **ghcr.io/dbt-labs/dbt-snowflake** → runs dbt transformations
-  - **mysql:8.0.42-debian** → serves as the operational (source) database
-  - **Airflow image** → automatically provided by Astronomer
+Pull the MySQL and dbt images:
 
-Pull the images manually:
 ```bash
-docker pull ghcr.io/dbt-labs/dbt-snowflake
 docker pull mysql:8.0.42-debian
+docker pull ghcr.io/dbt-labs/dbt-snowflake
 ```
-⚠️ The Airflow image is automatically handled by Astronomer when running ```astro dev start```.
 
----
+The Airflow image is handled by Astro CLI when the environment starts.
 
-### **4️⃣ (Optional) Initialize an Astro Project**
+### 4. Initialize the Astro Project (Optional)
 
-If you haven’t initialized an Airflow project yet, run:
+If the Airflow project has not been initialized, run:
+
 ```bash
 astro dev init
 ```
-This command creates the necessary project structure and default configuration files for Astronomer.
 
----
+### 5. Configure Snowflake Credentials
 
-### **5️⃣ Configure Snowflake Credentials →** ```profiles.yml```
+Update the Snowflake connection details in:
 
-Update your Snowflake account credentials in:
-```dbt/my_snowflake_db/profiles.yml```
+```text
+dbt/my_snowflake_db/profiles.yml
+```
 
-Example:
-```bash
+Example configuration:
+
+```yaml
 my_snowflake_db:
   target: dev
   outputs:
     dev:
       type: snowflake
       account: <your-account>
-
       user: <your-username>
       password: <your-password>
-
       role: <your-role>
       database: <your-database>
       warehouse: <your-warehouse>
       schema: <your-schema>
       threads: 4
-      client_session_keep_alive: False
+      client_session_keep_alive: false
 ```
 
-🔒 Important: Do not commit this file to GitHub since it contains your Snowflake credentials.
+**Security:** Do not commit credentials or a populated `profiles.yml` to Git.
 
----
+### 6. Configure Airflow Connections
 
-### **6️⃣ Configure Airflow Connections →** ```airflow_settings.yml```
+Configure the MySQL and Snowflake connections in:
 
-Set up your Snowflake and MySQL connections in:
-```airflow/airflow_settings.yml```
+```text
+airflow/airflow_settings.yaml
+```
 
 Example:
-```bash
+
+```yaml
 airflow:
   connections:
     - conn_id: retail_supply_chain
       conn_type: mysql
-      conn_host: airflow_fb4c73-store_a-1
+      conn_host: <mysql-container-host>
       conn_schema: retail_supply_chain
-      conn_login: mysql
-      conn_password: mysql
+      conn_login: <mysql-username>
+      conn_password: <mysql-password>
       conn_port: 3306
       conn_extra: {}
 
@@ -316,80 +340,76 @@ airflow:
         schema: <your-schema>
 ```
 
----
+Replace the placeholders with values for your environment. The MySQL host must match the hostname reachable from the Airflow container.
 
-### **7️⃣ Start the Local Environment**
+### 7. Start the Local Environment
 
-Spin up the entire local stack (Airflow, MySQL, and dbt containers) with:
+Start the Airflow environment:
+
 ```bash
 astro dev start
 ```
 
-⏱️ Wait a few minutes for all containers to fully initialize.
+Wait for the containers to initialize, then verify that they are running:
 
-Check that the containers are running:
 ```bash
 docker ps
 ```
 
----
+### 8. Import Airflow Connections and Variables
 
-### **8️⃣ Import Airflow Connections and Variables**
+Import the preconfigured Airflow objects from `airflow_settings.yaml`:
 
-Once the containers are up, import the pre-configured Airflow settings (connections, variables, etc.) from the file ```airflow_settings.yaml```:
 ```bash
 astro dev object import
 ```
-✅ This automatically configures your Airflow environment with:
-  - Snowflake connection
-  - MySQL connection
-  - Variables like secret_file, sql_file, and others
 
----
+This imports the configured connections and variables, including settings such as `secret_file` and `sql_file`, when they are defined in the settings file.
 
-### **🔟 Access the Airflow Web UI**
+### 9. Access the Airflow Web UI
 
-Once Airflow is up and running, open:
-```bash
+Open:
+
+```text
 http://localhost:8080
 ```
 
-Default credentials (Astro):
-```bash
+Default local Astro credentials:
+
+```text
 Username: admin
 Password: admin
 ```
 
-After logging in, locate the DAG named daily_sales and unpause it to start the workflow.
+Locate the `daily_sales` DAG and unpause it to enable scheduled execution.
 
----
+### Run Result
 
-✅ Done!
+Once the DAG is enabled, the workflow will:
 
-Your pipeline will now automatically:
+1. Create the required schemas and tables in Snowflake.
+2. Extract dimension and fact data from MySQL.
+3. Load raw data into the Snowflake `landing` schema.
+4. Run dbt source tests.
+5. Execute dbt transformations.
+6. Test the transformed models.
+7. Run dbt snapshots to track historical changes.
 
-  - Create schemas and tables in Snowflake
-  - Extract data from MySQL
-  - Load raw data into the landing schema
-  - Run dbt transformations and snapshots
-  - Perform dbt model testing
+## Quick Reference
 
-⚡ Quick Summary (Cheat Sheet)
-```bash 
-# 1. Install Docker & Astro CLI
-# 2. Pull required images
+```bash
+# Install Docker and Astro CLI first
+
+# Pull required images
 docker pull mysql:8.0.42-debian
 docker pull ghcr.io/dbt-labs/dbt-snowflake
 
-# 3. Configure credentials
-# - dbt/my_snowflake_db/profiles.yml
-# - airflow/airflow_settings.yml
-
-# 4. Start the environment
+# Start the local Airflow environment
 astro dev start
 
-# 5. Open Airflow UI
-http://localhost:8080
-```
+# Import Airflow connections and variables
+astro dev object import
 
----
+# Open Airflow UI
+# http://localhost:8080
+```
